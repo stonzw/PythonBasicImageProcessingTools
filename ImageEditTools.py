@@ -43,7 +43,7 @@ def imread(image_path, is_pil=False):
         return Image.fromarray(image)
     return image
 
-def sampleDestWH(image_width, image_height, alpha=1, beta=0.3):
+def sample_dest_wh(image_width, image_height, alpha=1, beta=0.3):
     w = int(image_width * np.random.beta(alpha, beta))
     h = int(image_height * np.random.beta(alpha, beta))
     return [
@@ -54,7 +54,7 @@ def sampleDestWH(image_width, image_height, alpha=1, beta=0.3):
     ]
     return w,h
 
-def recapCrop(recapWH, images, destW, destH):
+def recap_crop(recapWH, images, destW, destH):
     crop_images = []
     for image, dest_wh in zip(images, recapWH):
         src_wh = get_image_wh(image)
@@ -76,8 +76,8 @@ def recapCrop(recapWH, images, destW, destH):
     return crop_images
 
 def recap(images, alpha=1, beta=0.3):
-    recapWHs = sampleDestWH(images[0].shape[1], images[0].shape[0],alpha,beta)
-    recapImages = recapCrop(recapWHs, images, images[0].shape[1], images[0].shape[0])
+    recapWHs = sample_dest_wh(images[0].shape[1], images[0].shape[0],alpha,beta)
+    recapImages = recap_crop(recapWHs, images, images[0].shape[1], images[0].shape[0])
     imageUpper = np.hstack([recapImages[0],recapImages[1]])
     imageLower = np.hstack([recapImages[2],recapImages[3]])
     recapImage = np.vstack([imageUpper,imageLower])
@@ -95,7 +95,7 @@ def pil2cv(image):
 def isPIL(image):
     return type(image) == Image.Image
 
-def paddingImage(image, top=0, bottom=0, left=0, right=0, color=(0, 0, 0)):
+def padding_image(image, top=0, bottom=0, left=0, right=0, color=(0, 0, 0)):
     if isPIL(image):
         _image = cv2.copyMakeBorder(pil2cv(image), top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)
         return cv2pil(_image)
@@ -103,7 +103,7 @@ def paddingImage(image, top=0, bottom=0, left=0, right=0, color=(0, 0, 0)):
         _image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)
         return _image
 
-def resizeImagePadding(image, wh):
+def resize_image_padding(image, wh):
     image_w,image_h = get_image_wh(image)
     padding_width = wh[0] - image_w
     padding_height = wh[1] - image_h
@@ -112,7 +112,7 @@ def resizeImagePadding(image, wh):
         right_padding = padding_width - left_padding
         top_padding = padding_height // 2
         bottom_padding = padding_height - top_padding
-        return paddingImage(image, top=top_padding,bottom=bottom_padding,left=left_padding, right=right_padding)
+        return padding_image(image, top=top_padding,bottom=bottom_padding,left=left_padding, right=right_padding)
     if padding_height < padding_width:
         image_resized = resize_height(image, wh[1])
         resized_width = get_image_wh(image_resized)[0]
@@ -120,7 +120,7 @@ def resizeImagePadding(image, wh):
         assert 0 < padding_width
         left_padding = padding_width // 2
         right_padding = padding_width - left_padding
-        return paddingImage(image_resized, left=left_padding, right=right_padding)
+        return padding_image(image_resized, left=left_padding, right=right_padding)
     else:
         image_resized = resize_width(image, wh[0])
         resized_height = get_image_wh(image_resized)[1]
@@ -128,7 +128,7 @@ def resizeImagePadding(image, wh):
         assert 0 < padding_height
         top_padding = padding_height // 2
         bottom_padding = padding_height - top_padding
-        return paddingImage(image_resized, top=top_padding, bottom=bottom_padding)
+        return padding_image(image_resized, top=top_padding, bottom=bottom_padding)
 
 def patch_row_patch_height(image, patch_height, ignore_fraction_size_ratio = 0.1):
     if image.shape[0] < patch_height:
