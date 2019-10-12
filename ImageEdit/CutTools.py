@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 from PIL import Image
 
-
 def get_image_wh(image):
     t = type(image)
     if t == np.ndarray:
@@ -35,9 +34,13 @@ def resize_height(image, resize_height):
     ratio = resize_height / h
     new_wh = (int(w * ratio), resize_height)
     return resize_image(image, new_wh)
-
+def logging_info(msg):
+    print(msg)
 def imread(image_path, is_pil=False):
     image = cv2.imread(image_path)
+    if image is None:
+        logging_info('cannot read %s' % image_path)
+        return 
     image  = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     if is_pil:
         return Image.fromarray(image)
@@ -117,7 +120,7 @@ def resize_image_padding(image, wh):
         image_resized = resize_height(image, wh[1])
         resized_width = get_image_wh(image_resized)[0]
         padding_width = wh[0] - resized_width
-        assert 0 < padding_width
+        assert 0 <= padding_width
         left_padding = padding_width // 2
         right_padding = padding_width - left_padding
         return padding_image(image_resized, left=left_padding, right=right_padding)
@@ -125,7 +128,7 @@ def resize_image_padding(image, wh):
         image_resized = resize_width(image, wh[0])
         resized_height = get_image_wh(image_resized)[1]
         padding_height = wh[0] - resized_height
-        assert 0 < padding_height
+        assert 0 <= padding_height
         top_padding = padding_height // 2
         bottom_padding = padding_height - top_padding
         return padding_image(image_resized, top=top_padding, bottom=bottom_padding)
